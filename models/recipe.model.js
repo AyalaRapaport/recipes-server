@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import { Schema, model } from 'mongoose'
 
-const recipeSchema = new mongoose.Schema({
+const recipeSchema = new Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
     categoryName: { type: String, required: true },
@@ -14,6 +14,6 @@ const recipeSchema = new mongoose.Schema({
     preparationInstructions: { type: String, required: true },
     image: { type: String },
     private: { type: Boolean, default: false },
-    addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    addedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 })
-module.exports.Recipe = mongoose.model('recipes', recipeSchema)
+export const Recipe = model('recipes', recipeSchema)

@@ -1,10 +1,10 @@
-const mongoose=require('mongoose')
+import { Schema, model } from 'mongoose'
 
-const categorySchema=new mongoose.Schema({
+const categorySchema=new Schema({
 code:{type:String,required:true},
 description:{type:String,required:true},
 recipes: [{ 
     name: { type: String, required: true }, 
     id: { type: Number, required: true } 
 }]})
-module.exports.Category=mongoose.model('categories',categorySchema)
+export const Category=model('categories',categorySchema)
