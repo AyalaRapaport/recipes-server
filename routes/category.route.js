@@ -3,8 +3,8 @@ import { getAllCategories,getAllRecipesByCategory,getCategoryById } from '../con
 
 const router = express.Router();
 
-router.post('/categories', getAllCategories);
-router.post('/recipesByCategory', getAllRecipesByCategory);
+router.get('/', getAllCategories);
+router.get('/recipesByCategory', getAllRecipesByCategory);
 router.get('/:id',getCategoryById)
 
 export default router

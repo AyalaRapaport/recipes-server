@@ -1,5 +1,6 @@
 import { generateToken, User } from '../models/user.model.js';
 import { compare } from 'bcrypt';
+import { userValidators } from '../models/user.model.js';
 
 export async function signIn(req, res, next) {
     const { email, password } = req.body;
@@ -23,10 +24,17 @@ export async function signIn(req, res, next) {
 }
 
 export async function signUp(req, res, next) {
-    const { username, email, password, address } = req.body;
-    try {
-        const user = new User({ username, email, password, address });
+    const { username, email, password, address, role } = req.body;
+    console.log("role"+role);
+    const isValid = userValidators.login.validate({ email, password });
+    if (isValid.error) {
+        console.log("err" + isValid.error);
+        return next({ message: isValid.error.message })
+
+    } try {
+        const user = new User({ username, email, password, address, role });
         await user.save();
+        console.log(user);
         const token = generateToken(user);
         user.password = "****";
         return res.status(201).json({ user, token });
@@ -37,9 +45,8 @@ export async function signUp(req, res, next) {
 }
 
 export async function getAllUsers(req, res, next) {
-    const { id } = req.params;
     try {
-        const users = await User.find().select('-__v');
+        const users = await User.find().select('-__v')
         return res.json(users);
     } catch (error) {
         next(error);

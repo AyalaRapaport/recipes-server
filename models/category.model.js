@@ -1,10 +1,12 @@
 import { Schema, model } from 'mongoose'
+import mongoose from 'mongoose'
 
-const categorySchema=new Schema({
-code:{type:String,required:true},
-description:{type:String,required:true},
-recipes: [{ 
-    name: { type: String, required: true }, 
-    id: { type: Number, required: true } 
-}]})
+const recipeSchema = new Schema({
+    _id: { type: mongoose.Types.ObjectId },
+    name: { type: String },
+})
+const categorySchema = new Schema({
+    name: { type: String, required: true },
+    recipes:{type:[recipeSchema]}
+})
 export const Category=model('categories',categorySchema)

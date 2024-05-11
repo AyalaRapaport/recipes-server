@@ -1,9 +1,18 @@
 import mongoose from 'mongoose';
 import { Recipe } from '../models/recipe.model.js'
+import { Category } from '../models/category.model.js'
 
 export async function getAllRecipes(req, res, next) {
+    let { search, page, perPage } = req.query;
+    search ??= '';
+    page ??= '';
+    perPage ??= '';
+
     try {
-        const recipes = await Recipe.find().select('-__v');
+        const recipes = await Recipe.find({ name: new RegExp(search) })
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .select('-__v');
         return res.json(recipes);
     } catch (error) {
         next(error);
@@ -11,22 +20,23 @@ export async function getAllRecipes(req, res, next) {
 }
 
 export async function getRecipeById(req, res, next) {
-    try {
-        const recipeId = req.params.recipeId;
-        const recipe = await Recipe.findById(recipeId).select('-__v');
-        if (!recipe) {
-            return next('Recipe not found');
-        }
-        return res.json(recipe);
-    } catch (error) {
-        next(error);
-    }
+    const id = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(id))
+        next({ message: 'id is not valid' })
+    else
+        Recipe.findById(id, { __v: false })
+            .then(recipe => {
+                res.json(recipe);
+            })
+            .catch(err => {
+                next({ message: 'recipe not found', status: 404 })
+            })
 }
 
 export async function getRecipeByUserId(req, res, next) {
     try {
-        const { userId } = req.params;
-        const recipes = await Recipe.find({ userId: userId }).select('-__v');
+        const { id } = req.params;
+        const recipes = await Recipe.find({ 'user.id': id }).select('-__v');
         return res.json(recipes);
     } catch (error) {
         next(error);
@@ -48,6 +58,20 @@ export async function addRecipe(req, res, next) {
     try {
         const newRecipe = new Recipe(req.body);
         await newRecipe.save();
+        newRecipe.categories.forEach(async category => {
+            let c = await Category.findOne({ name: category })
+            if (!c) {
+                try {
+                    const newCategory = new Category({ name: c, recipes: [] });
+                    await newCategory.save();
+                    c = newCategory;
+                } catch (err) {
+                    next(err);
+                }
+            }
+            category.recipes.push({ _id: newRecipe._id, name: newRecipe.name })
+            await category.save();
+        })
         return res.status(201).json(newRecipe);
     } catch (error) {
         next(error);
