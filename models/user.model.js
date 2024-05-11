@@ -34,7 +34,6 @@ export const userValidators = {
 };
 
 export function generateToken(user) {
-    console.log("user"+user);
     const privateKey = process.env.JWT_SECRET || 'JWT_SECRET';
     const data = { role: user.role, user_id: user._id };
     const token = sign(data, privateKey, { expiresIn: '3h' });

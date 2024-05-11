@@ -25,10 +25,8 @@ export async function signIn(req, res, next) {
 
 export async function signUp(req, res, next) {
     const { username, email, password, address, role } = req.body;
-    console.log("role"+role);
     const isValid = userValidators.login.validate({ email, password });
     if (isValid.error) {
-        console.log("err" + isValid.error);
         return next({ message: isValid.error.message })
 
     } try {

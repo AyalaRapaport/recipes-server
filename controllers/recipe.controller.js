@@ -100,8 +100,27 @@ export async function deleteRecipe(req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(id))
         next({ message: 'id is not valid' })
     try {
-        if (!(await Recipe.findById(id)))
+        let recipe = await Recipe.findById(id);
+        if (!recipe)
             return next({ message: 'recipe not found', status: 404 })
+        recipe.categories.forEach(async c => {
+            try {
+                await Category.updateOne(
+                    { name: c },
+                    { $pull: { recipes: { _id: recipe._id } } }
+                )
+                let category = await Category.findOne({ name: c }).then(c => {
+                    return c;
+                })
+                    .catch(err => {
+                        next({ message: 'category not found', status: 404 })
+                    });
+                if (category.recipes.length === 0)
+                    await Category.findByIdAndDelete(category._id);
+            } catch (error) {
+                next(error)
+            }
+        })
 
         await Recipe.findByIdAndDelete(id)
         return res.status(204).send();
