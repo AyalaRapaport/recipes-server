@@ -7,8 +7,8 @@ router.post('/',addRecipe);
 router.delete('/',deleteRecipe);
 router.get('/',getAllRecipes);
 router.get('/recipeByPreparationTime',getReciepeByPreparationTime);
-router.get('/recipeById',getRecipeById);
+router.get('/:id',getRecipeById);
 router.get('/recipeByUserId',getRecipeByUserId);
-router.get('/:id',updateRecipe);
+router.put('/:id',updateRecipe);
 
 export default router

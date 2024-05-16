@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 export async function isAdmin(req, res, next) {
     try {
         const { authorization } = req.headers;//extracting the token from the header
-        console.log(authorization);
         const [, token] = authorization.split(' ');
         const privateKey = process.env.JWT_SECRET || 'JWT_SECRET'; // secret string by which the token was created
 

@@ -13,23 +13,29 @@ const userSchema = new Schema({
     role: { type: String, default: 'user', enum: ['admin', 'user'] }
 });
 
-userSchema.pre('save', async function (next) {
-    const salt = process.env.BCRYPT_SALT;
-    try {
-        const hashPass = bcrypt.hash(this.password, salt);
+userSchema.pre('save', function (next) {
+    const salt = +process.env.BCRYPT_SALT | 10;
+    bcrypt.hash(this.password, salt, async (err, hashPass) => {
+        if (err)
+            throw new Error(err.message);
         this.password = hashPass;
-        next();
-    } catch (error) {
-        next(error);
-    }
+        console.log("pre"+this.password);
+        next()
+    })
 });
 
 export const User = model('users', userSchema);
 
 export const userValidators = {
     login: Joi.object().keys({
-        email: Joi.string().email().required(),
-        password: Joi.string().min(3).max(10),
+        email: Joi.string().email().required().messages({
+            'string.email': 'יש להזין כתובת דוא"ל תקינה',
+            'any.required': 'שדה האימייל הוא שדה חובה'
+        }),
+        password: Joi.string().min(4).required().pattern(new RegExp('^(?=.*?[a-zA-Z])(?=.*?[0-9]).{4,}$')).messages({
+            'string.min': 'הסיסמה חייבת להכיל לפחות 8 תווים',
+            'string.pattern.base': 'הסיסמה חייבת לכלול לפחות אות אחת באנגלית ולפחות מספר אחד'
+        }),
     })
 };
 
