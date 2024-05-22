@@ -1,5 +1,5 @@
 import { generateToken, User } from '../models/user.model.js';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs';
 import { userValidators } from '../models/user.model.js';
 
 export async function signIn(req, res, next) {
