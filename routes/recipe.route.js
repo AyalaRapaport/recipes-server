@@ -8,7 +8,7 @@ router.delete('/',deleteRecipe);
 router.get('/',getAllRecipes);
 router.get('/recipeByPreparationTime',getReciepeByPreparationTime);
 router.get('/:id',getRecipeById);
-router.get('/recipeByUserId',getRecipeByUserId);
+router.get('/recipeByUserId/:id',getRecipeByUserId);
 router.put('/:id',updateRecipe);
 
 export default router

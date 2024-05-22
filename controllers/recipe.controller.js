@@ -36,7 +36,7 @@ export async function getRecipeById(req, res, next) {
 export async function getRecipeByUserId(req, res, next) {
     try {
         const { id } = req.params;
-        const recipes = await Recipe.find({ 'user.id': id }).select('-__v');
+        const recipes = await Recipe.find({ 'addedBy._id': id }).select('-__v');
         return res.json(recipes);
     } catch (error) {
         next(error);
@@ -57,26 +57,32 @@ export async function getReciepeByPreparationTime(req, res, next) {
 export async function addRecipe(req, res, next) {
     try {
         const newRecipe = new Recipe(req.body);
-        await newRecipe.save();
-        newRecipe.categories.forEach(async category => {
-            let c = await Category.findOne({ name: category })
+         await newRecipe.save();
+
+        const categoryPromises = newRecipe.categories.map(async category => {
+            let c = await Category.findOne({ name: category });
+            console.log(c);
             if (!c) {
                 try {
-                    const newCategory = new Category({ name: c, recipes: [] });
-                    await newCategory.save();
-                    c = newCategory;
+                    c = new Category({ name: category, recipes: [] });
+                     await c.save();
                 } catch (err) {
+                    console.log(err);
                     next(err);
                 }
             }
-            category.recipes.push({ _id: newRecipe._id, name: newRecipe.name })
-            await category.save();
-        })
+            c.recipes.push({ _id: newRecipe._id, name: newRecipe.name });
+           await c.save();
+        });
+
+        await Promise.all(categoryPromises);
+
         return res.status(201).json(newRecipe);
     } catch (error) {
         next(error);
     }
 }
+
 
 export async function updateRecipe(req, res, next) {
     const id = req.params.id;
