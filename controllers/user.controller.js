@@ -1,16 +1,15 @@
 import { generateToken, User } from '../models/user.model.js';
-import bcrypt from 'bcryptjs';
+ //import bcrypt from 'bcryptjs';
+ import bcrypt from 'bcrypt'
 import { userValidators } from '../models/user.model.js';
 
 export async function signIn(req, res, next) {
     const v = userValidators.login.validate(req.body);
-    console.log(v);
     if (v.error)
         return next({ message: v.error.message })
 
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    console.log(password);
     console.log(user);
     if (user) {
         bcrypt.compare(password, user.password, (err, isSame) => {
@@ -22,7 +21,7 @@ export async function signIn(req, res, next) {
                 user.password = "****";
                 return res.send({ user, token });
             }
-            return next({ message: 'Auth Failed', status: 401 })
+            return next({ message: 'Auth Failed-user isnot found', status: 401 })
         })
     }
     else {

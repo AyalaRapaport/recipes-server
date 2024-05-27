@@ -2,7 +2,7 @@ import express from 'express'
 import {addRecipe,deleteRecipe,getAllRecipes,getReciepeByPreparationTime,getRecipeById,getRecipeByUserId,updateRecipe} from '../controllers/recipe.controller.js'
 
 const router=express.Router();
-
+console.log(router);
 router.post('/',addRecipe);
 router.delete('/',deleteRecipe);
 router.get('/',getAllRecipes);

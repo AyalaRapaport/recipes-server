@@ -33,7 +33,7 @@ export const userValidators = {
             'any.required': 'שדה האימייל הוא שדה חובה'
         }),
         password: Joi.string().min(4).required().pattern(new RegExp('^(?=.*?[a-zA-Z])(?=.*?[0-9]).{4,}$')).messages({
-            'string.min': 'הסיסמה חייבת להכיל לפחות 8 תווים',
+            'string.min': 'הסיסמה חייבת להכיל לפחות 4 תווים',
             'string.pattern.base': 'הסיסמה חייבת לכלול לפחות אות אחת באנגלית ולפחות מספר אחד'
         }),
     })

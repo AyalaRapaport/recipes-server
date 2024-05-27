@@ -55,6 +55,7 @@ export async function getReciepeByPreparationTime(req, res, next) {
 }
 
 export async function addRecipe(req, res, next) {
+    console.log("addrecipe");
     try {
         const newRecipe = new Recipe(req.body);
          await newRecipe.save();
