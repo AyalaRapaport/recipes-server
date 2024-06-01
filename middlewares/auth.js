@@ -19,6 +19,7 @@ export async function isAdmin(req, res, next) {
 }
 
 export async function isRegisteredUser(req, res, next) {
+    console.log('isRegisteredUser');
     try {
         const { authorization } = req.headers;
         const [, token] = authorization.split(' ');
@@ -28,6 +29,19 @@ export async function isRegisteredUser(req, res, next) {
         next();
     } catch (error) {
         next({ message: error, status: 401 })
-
+    }
+}
+export async function isTokenValid() {
+    try {
+        const { authorization } = req.headers;
+        const [, token] = authorization.split(' ');
+        const key = process.env.JWT_SECRET || 'JWT_SECRET';
+        const decoded = jwt.verify(token, key);
+        return true; 
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return false; 
+        }
+        throw error; 
     }
 }
