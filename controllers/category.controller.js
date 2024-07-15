@@ -21,12 +21,11 @@ export async function getAllRecipesByCategory(req, res, next) {
 
 export async function getCategoryById(req, res, next) {
     const id = req.params.id;
-
+    console.log(mongoose.Types.ObjectId.isValid(id));
     if (!mongoose.Types.ObjectId.isValid(id))
         next({ message: 'id is not valid' })
-
     else {
-        Category.findById(id, { __v: false })
+        Category.findById(id, { __v: false }).populate("recipes").select("-__v")
             .then(c => {
                 res.json(c);
             })
@@ -35,3 +34,12 @@ export async function getCategoryById(req, res, next) {
             })
     }
 }
+
+export async function getCategoriesWithRecipes(req, res, next) {
+    try {
+        const categories = await Category.find().populate("recipes").select("-__v");
+        return res.json(categories);
+    } catch (error) {
+        next(error);
+    }
+};

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Recipe } from '../models/recipe.model.js'
 import { Category } from '../models/category.model.js'
+import path from 'path';
 
 export async function getAllRecipes(req, res, next) {
     let { search, page, perPage } = req.query;
@@ -9,7 +10,7 @@ export async function getAllRecipes(req, res, next) {
     perPage ??= '';
 
     try {
-        const recipes = await Recipe.find({ name: new RegExp(search) })
+        const recipes = await Recipe.find({ name: new RegExp(search), isPrivate: false })
             .skip((page - 1) * perPage)
             .limit(perPage)
             .select('-__v');
@@ -26,6 +27,9 @@ export async function getRecipeById(req, res, next) {
     else
         Recipe.findById(id, { __v: false })
             .then(recipe => {
+                // const imagePath = recipe.imageUrl ? path.normalize('images', recipe.image) : null;
+                // const image = imagePath ? `${req.protocol}://${req.get('host')}/${imagePath}` : null;
+                //res.json({ ...recipe.toObject(), image });
                 res.json(recipe);
             })
             .catch(err => {
@@ -33,10 +37,10 @@ export async function getRecipeById(req, res, next) {
             })
 }
 
-export async function getRecipeByUserId(req, res, next) {
+export async function getPrivateRecipeByUserId(req, res, next) {
     try {
         const { id } = req.params;
-        const recipes = await Recipe.find({ 'addedBy._id': id }).select('-__v');
+        const recipes = await Recipe.find({ 'addedBy._id': id, isPrivate: true }).select('-__v');
         return res.json(recipes);
     } catch (error) {
         next(error);
@@ -53,17 +57,16 @@ export async function getReciepeByPreparationTime(req, res, next) {
     }
 }
 
+
 export async function addRecipe(req, res, next) {
     console.log("addrecipe");
     try {
-        const { name, description, difficulity, preparationHours, preparationMinutes, isPrivate, image, categories, newCategories, layers, ingredients, preparationInstructions, user
-        } = req.body;
-        console.log(layers);
+        const recipeDataString = req.body.recipe;
+        const recipeData = JSON.parse(recipeDataString);
+        const imageName = req.file ? req.file.filename : null;
+        const { name, description, difficulity, preparationHours, preparationMinutes, isPrivate, imageUrl, categories, newCategories, layers, ingredients, preparationInstructions, user } = recipeData;
         const totalPreparationTime = (preparationHours * 60) + preparationMinutes;
-        // const layers = [{
-        //     description: 'Main Layer',
-        //     ingredients: ingredients.map(ingredient => ingredient.name).filter(name => name) // המרת האובייקטים למחרוזות וסינון מחרוזות ריקות
-        // }];
+
         const processedLayers = layers.map(layer => ({
             description: layer.description,
             ingredients: layer.ingredients.map(ingredient => ingredient.name).filter(name => name)
@@ -79,7 +82,8 @@ export async function addRecipe(req, res, next) {
             addDate: new Date(),
             layers: processedLayers,
             preparationInstructions: prepInstructionsArray,
-            image: [image],
+            imageName: imageName,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${imageName}`,
             isPrivate: isPrivate === 'כן',
             addedBy: {
                 _id: user._id,
@@ -151,9 +155,14 @@ export async function updateRecipe(req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(id))
         next({ message: 'id is not valid' })
     try {
-        const { name, description, difficulity, preparationHours, preparationMinutes, isPrivate, image, categories, newCategories, layers, ingredients, preparationInstructions, user
-        } = req.body;
-        console.log(layers);
+        const recipeDataString = req.body.recipe;
+        console.log(recipeDataString);
+        const recipeData = JSON.parse(recipeDataString);
+        console.log(recipeData);
+        const { name, description, difficulity, preparationHours, preparationMinutes, isPrivate, imageName, imageUrl, categories, layers, preparationInstructions, user
+        } = recipeData;
+        const newImageName = req.file ? req.file.filename : imageName;
+        const updatedImageUrl = req.file ? `${req.protocol}://${req.get('host')}/images/${newImageName}` : imageUrl;
         const totalPreparationTime = (preparationHours * 60) + preparationMinutes;
 
         const processedLayers = layers.map(layer => ({
@@ -163,7 +172,7 @@ export async function updateRecipe(req, res, next) {
         const prepInstructionsArray = preparationInstructions.map(instr => instr.step).filter(step => step);
 
         const newRecipe = new Recipe({
-            _id:id,
+            _id: id,
             name,
             description,
             categories: categories,
@@ -172,7 +181,8 @@ export async function updateRecipe(req, res, next) {
             addDate: new Date(),
             layers: processedLayers,
             preparationInstructions: prepInstructionsArray,
-            image: [image],
+            imageName: newImageName,
+            imageUrl: updatedImageUrl,
             isPrivate: isPrivate === 'כן',
             addedBy: {
                 _id: user._id,

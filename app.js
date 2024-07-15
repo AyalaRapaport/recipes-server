@@ -7,7 +7,6 @@ import recipeRouter from './routes/recipe.route.js';
 import { pageNotFound, serverNotFound } from './middlewares/handleErrors.js'; 
 import 'dotenv/config';
 import './config/db.js';
-import { isTokenValid } from './middlewares/auth.js';
 
 const app = express();
 app.use(json()); 
@@ -21,7 +20,8 @@ app.get('/', (req, res) => {
 app.use("/users", userRouter);
 app.use("/categories", categoryRouter);
 app.use("/recipes",recipeRouter);
-app.use('/check-token',isTokenValid)
+app.use('/images',express.static('uploads'))
+// app.use('/check-token',isTokenValid)
 app.use(pageNotFound);
 app.use(serverNotFound);
 

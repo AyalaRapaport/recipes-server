@@ -3,7 +3,6 @@ import { getAllUsers, signIn, signUp } from '../controllers/user.controller.js'
 import { isAdmin } from '../middlewares/auth.js'
 
 const router = express.Router();
-console.log("userR");
 router.post('/signin', signIn);
 router.post('/signup', signUp);
 router.get('/', isAdmin, getAllUsers)

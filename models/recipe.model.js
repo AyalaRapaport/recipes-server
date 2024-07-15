@@ -12,7 +12,8 @@ const recipeSchema = new Schema({
         ingredients: { type: [String], required: true },
     }],
     preparationInstructions: { type: [String], required: true },
-    image: { type: [String] },
+    imageName: { type: String },
+    imageUrl: { type: String },
     isPrivate: { type: Boolean, default: false },
     addedBy: {
         _id: { type: Schema.Types.ObjectId, ref: 'User', required: true }
